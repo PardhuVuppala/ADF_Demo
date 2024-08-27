@@ -1,0 +1,25 @@
+{
+	"name": "DS_Customer_details_append",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_CSV_Appending_Files",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "DS-CustomerDetails",
+				"folderPath": "DS-appended-cutomerdetails",
+				"container": "con-appended-custmer-order-details"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
