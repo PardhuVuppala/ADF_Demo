@@ -1,0 +1,76 @@
+{
+	"name": "DFStagingTask",
+	"properties": {
+		"folder": {
+			"name": "DF-Staging"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Staging_Task",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "removeDuplicate"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as string,",
+				"          userId as string,",
+				"          projectName as string,",
+				"          taskName as string,",
+				"          teamMembers as string,",
+				"          dueDate as timestamp,",
+				"          completionPercentage as integer,",
+				"          forStoringTasks as string,",
+				"          createdAt as timestamp,",
+				"          updatedAt as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 aggregate(groupBy(id,",
+				"          userId,",
+				"          projectName,",
+				"          taskName,",
+				"          teamMembers,",
+				"          dueDate,",
+				"          completionPercentage,",
+				"          forStoringTasks,",
+				"          createdAt,",
+				"          updatedAt),",
+				"     TotalCompletion = sum(completionPercentage)) ~> removeDuplicate",
+				"removeDuplicate select(mapColumn(",
+				"          id,",
+				"          userId,",
+				"          projectName,",
+				"          taskName,",
+				"          teamMembers,",
+				"          dueDate,",
+				"          completionPercentage,",
+				"          forStoringTasks,",
+				"          createdAt,",
+				"          updatedAt",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(Project_Created_At = split(toString(createdAt), \" \")) ~> derivedColumn1"
+			]
+		}
+	}
+}
