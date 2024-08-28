@@ -10,6 +10,9 @@
 				"type": "String"
 			}
 		},
+		"folder": {
+			"name": "DS-Injection"
+		},
 		"annotations": [],
 		"type": "PostgreSqlV2Table",
 		"schema": [],
