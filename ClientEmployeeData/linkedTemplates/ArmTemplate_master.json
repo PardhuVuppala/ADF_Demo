@@ -1,0 +1,133 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ClientEmployeeData"
+		},
+		"AzureSqlDatabase1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
+		},
+		"LS_CSV_Appending_Files_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_CSV_Appending_Files'"
+		},
+		"PostgreSql_Connection_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'PostgreSql_Connection'"
+		},
+		"db_conn_customer_order_table_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'db_conn_customer_order_table'"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "client-employee-server-india.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "DB_Cutomer_OrderDetails"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "Admin_User"
+		},
+		"PostgreSql_Connection_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "localhost"
+		},
+		"PostgreSql_Connection_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "DashBoard"
+		},
+		"PostgreSql_Connection_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "postgres"
+		},
+		"db_conn_customer_order_table_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "client-employee-server-india.database.windows.net"
+		},
+		"db_conn_customer_order_table_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "DB_Cutomer_OrderDetails"
+		},
+		"db_conn_customer_order_table_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "Admin_User"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ClientEmployeeData_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureSqlDatabase1_password": {
+						"value": "[parameters('AzureSqlDatabase1_password')]"
+					},
+					"LS_CSV_Appending_Files_connectionString": {
+						"value": "[parameters('LS_CSV_Appending_Files_connectionString')]"
+					},
+					"db_conn_customer_order_table_password": {
+						"value": "[parameters('db_conn_customer_order_table_password')]"
+					},
+					"PostgreSql_Connection_password": {
+						"value": "[parameters('PostgreSql_Connection_password')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_server": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_database": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_database')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_userName": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]"
+					},
+					"db_conn_customer_order_table_properties_typeProperties_server": {
+						"value": "[parameters('db_conn_customer_order_table_properties_typeProperties_server')]"
+					},
+					"db_conn_customer_order_table_properties_typeProperties_database": {
+						"value": "[parameters('db_conn_customer_order_table_properties_typeProperties_database')]"
+					},
+					"db_conn_customer_order_table_properties_typeProperties_userName": {
+						"value": "[parameters('db_conn_customer_order_table_properties_typeProperties_userName')]"
+					},
+					"PostgreSql_Connection_properties_typeProperties_server": {
+						"value": "[parameters('PostgreSql_Connection_properties_typeProperties_server')]"
+					},
+					"PostgreSql_Connection_properties_typeProperties_database": {
+						"value": "[parameters('PostgreSql_Connection_properties_typeProperties_database')]"
+					},
+					"PostgreSql_Connection_properties_typeProperties_username": {
+						"value": "[parameters('PostgreSql_Connection_properties_typeProperties_username')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

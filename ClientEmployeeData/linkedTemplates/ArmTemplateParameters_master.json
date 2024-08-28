@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "ClientEmployeeData"
+		},
+		"AzureSqlDatabase1_password": {
+			"value": ""
+		},
+		"LS_CSV_Appending_Files_connectionString": {
+			"value": ""
+		},
+		"PostgreSql_Connection_password": {
+			"value": ""
+		},
+		"db_conn_customer_order_table_password": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"value": "client-employee-server-india.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"value": "DB_Cutomer_OrderDetails"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"value": "Admin_User"
+		},
+		"PostgreSql_Connection_properties_typeProperties_server": {
+			"value": "localhost"
+		},
+		"PostgreSql_Connection_properties_typeProperties_database": {
+			"value": "DashBoard"
+		},
+		"PostgreSql_Connection_properties_typeProperties_username": {
+			"value": "postgres"
+		},
+		"db_conn_customer_order_table_properties_typeProperties_server": {
+			"value": "client-employee-server-india.database.windows.net"
+		},
+		"db_conn_customer_order_table_properties_typeProperties_database": {
+			"value": "DB_Cutomer_OrderDetails"
+		},
+		"db_conn_customer_order_table_properties_typeProperties_userName": {
+			"value": "Admin_User"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
