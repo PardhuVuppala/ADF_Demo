@@ -1,0 +1,94 @@
+{
+	"name": "DF-Staging-UserData",
+	"properties": {
+		"folder": {
+			"name": "DF-Staging"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_DB_Staging_UserData",
+						"type": "DatasetReference"
+					},
+					"name": "UserdataCleaning"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DF_Staging_To_Prep_userData",
+						"type": "DatasetReference"
+					},
+					"name": "StoringInDataBase"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RemovingDuplicatedata"
+				},
+				{
+					"name": "SelectTheFiledsRequired"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          address as string,",
+				"          gender as string,",
+				"          dob as timestamp,",
+				"          role as string,",
+				"          phone_number as string,",
+				"          password as string,",
+				"          taskIds as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> UserdataCleaning",
+				"UserdataCleaning aggregate(groupBy(id,",
+				"          first_name,",
+				"          last_name,",
+				"          email,",
+				"          address,",
+				"          gender,",
+				"          dob,",
+				"          role,",
+				"          phone_number,",
+				"          password,",
+				"          taskIds),",
+				"     Max_Dob = max(dob),",
+				"     partitionBy('hash', 1)) ~> RemovingDuplicatedata",
+				"RemovingDuplicatedata select(mapColumn(",
+				"          id,",
+				"          first_name,",
+				"          last_name,",
+				"          email,",
+				"          address,",
+				"          gender,",
+				"          dob,",
+				"          role,",
+				"          phone_number,",
+				"          password,",
+				"          taskIds",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectTheFiledsRequired",
+				"SelectTheFiledsRequired sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> StoringInDataBase"
+			]
+		}
+	}
+}
