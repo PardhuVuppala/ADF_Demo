@@ -442,11 +442,157 @@
 						]
 					}
 				},
+				"folder": {
+					"name": "PL-Injection"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceDataset_p41')]",
 				"[concat(variables('factoryId'), '/datasets/DestinationDataset_p41')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Staging_To_Prep_UserData')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Staging-to-Prep-UserData",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DF-Staging-UserData",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"UserdataCleaning": {},
+									"StoringInDataBase": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "PL-Staging-to-Prep"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/DF-Staging-UserData')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DF_Staging_To_Prep_userData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Staging"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "prep",
+					"table": "UserData"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB_Staging_UserData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Staging"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "nvarchar"
+					},
+					{
+						"name": "first_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "last_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "email",
+						"type": "nvarchar"
+					},
+					{
+						"name": "address",
+						"type": "nvarchar"
+					},
+					{
+						"name": "gender",
+						"type": "nvarchar"
+					},
+					{
+						"name": "dob",
+						"type": "datetime2",
+						"scale": 0
+					},
+					{
+						"name": "role",
+						"type": "nvarchar"
+					},
+					{
+						"name": "phone_number",
+						"type": "nvarchar"
+					},
+					{
+						"name": "password",
+						"type": "nvarchar"
+					},
+					{
+						"name": "taskIds",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "raw",
+					"table": "UserData"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
 			]
 		},
 		{
@@ -628,6 +774,106 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DF-Staging-UserData')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "DF-Staging"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_DB_Staging_UserData",
+								"type": "DatasetReference"
+							},
+							"name": "UserdataCleaning"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DF_Staging_To_Prep_userData",
+								"type": "DatasetReference"
+							},
+							"name": "StoringInDataBase"
+						}
+					],
+					"transformations": [
+						{
+							"name": "RemovingDuplicatedata"
+						},
+						{
+							"name": "SelectTheFiledsRequired"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          address as string,",
+						"          gender as string,",
+						"          dob as timestamp,",
+						"          role as string,",
+						"          phone_number as string,",
+						"          password as string,",
+						"          taskIds as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> UserdataCleaning",
+						"UserdataCleaning aggregate(groupBy(id,",
+						"          first_name,",
+						"          last_name,",
+						"          email,",
+						"          address,",
+						"          gender,",
+						"          dob,",
+						"          role,",
+						"          phone_number,",
+						"          password,",
+						"          taskIds),",
+						"     Max_Dob = max(dob),",
+						"     partitionBy('hash', 1)) ~> RemovingDuplicatedata",
+						"RemovingDuplicatedata select(mapColumn(",
+						"          id,",
+						"          first_name,",
+						"          last_name,",
+						"          email,",
+						"          address,",
+						"          gender,",
+						"          dob,",
+						"          role,",
+						"          phone_number,",
+						"          password,",
+						"          taskIds",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectTheFiledsRequired",
+						"SelectTheFiledsRequired sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> StoringInDataBase"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_DB_Staging_UserData')]",
+				"[concat(variables('factoryId'), '/datasets/DF_Staging_To_Prep_userData')]"
+			]
 		}
 	]
 }
