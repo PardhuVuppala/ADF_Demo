@@ -177,6 +177,54 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB_Prep_Task')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Prep"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "prep",
+					"table": "Task"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB_Prep_UserData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Prep"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "prep",
+					"table": "UserData"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_DB_Staging_UserData')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -247,6 +295,54 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_Staging_Task')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Staging"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "raw",
+					"table": "Task"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Staging_to_Prep_Task')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Staging"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "prep",
+					"table": "Task"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DestinationDataset_p41')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -276,6 +372,30 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/db_conn_customer_order_table')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/reporting_DS_DB_userData_Task')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Reporting"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "reporting",
+					"table": "Dimension_Table_userData_task"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
 			]
 		},
 		{
@@ -436,6 +556,282 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_DB_Staging_UserData')]",
 				"[concat(variables('factoryId'), '/datasets/DF_Staging_To_Prep_userData')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DFStagingTask')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "DF-Staging"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_Staging_Task",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_Staging_to_Prep_Task",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "removeDuplicate"
+						},
+						{
+							"name": "select1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          id as string,",
+						"          userId as string,",
+						"          projectName as string,",
+						"          taskName as string,",
+						"          teamMembers as string,",
+						"          dueDate as timestamp,",
+						"          completionPercentage as integer,",
+						"          forStoringTasks as string,",
+						"          createdAt as timestamp,",
+						"          updatedAt as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source1",
+						"source1 aggregate(groupBy(id,",
+						"          userId,",
+						"          projectName,",
+						"          taskName,",
+						"          teamMembers,",
+						"          dueDate,",
+						"          completionPercentage,",
+						"          forStoringTasks,",
+						"          createdAt,",
+						"          updatedAt),",
+						"     TotalCompletion = sum(completionPercentage)) ~> removeDuplicate",
+						"removeDuplicate select(mapColumn(",
+						"          id,",
+						"          userId,",
+						"          projectName,",
+						"          taskName,",
+						"          teamMembers,",
+						"          dueDate,",
+						"          completionPercentage,",
+						"          forStoringTasks,",
+						"          createdAt,",
+						"          updatedAt",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Staging_Task')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Staging_to_Prep_Task')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DF_Reporting_UserData_Task')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "DF-PREP"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_DB_Prep_UserData",
+								"type": "DatasetReference"
+							},
+							"name": "PrepToReportingUserData"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_DB_Prep_Task",
+								"type": "DatasetReference"
+							},
+							"name": "PrepToReportingTask"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "reporting_DS_DB_userData_Task",
+								"type": "DatasetReference"
+							},
+							"name": "Dimensiontable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "join1"
+						},
+						{
+							"name": "ConvertingStringCollection"
+						},
+						{
+							"name": "flatten1"
+						},
+						{
+							"name": "derivedColumn2"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     parameter1 as string (taskIds)",
+						"}",
+						"source(output(",
+						"          id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          address as string,",
+						"          gender as string,",
+						"          dob as timestamp,",
+						"          role as string,",
+						"          phone_number as string,",
+						"          password as string,",
+						"          taskIds as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> PrepToReportingUserData",
+						"source(output(",
+						"          id as string,",
+						"          userId as string,",
+						"          projectName as string,",
+						"          taskName as string,",
+						"          teamMembers as string,",
+						"          dueDate as timestamp,",
+						"          completionPercentage as integer,",
+						"          forStoringTasks as string,",
+						"          createdAt as timestamp,",
+						"          updatedAt as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> PrepToReportingTask",
+						"derivedColumn2, PrepToReportingTask join(taskIds == PrepToReportingTask@id,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"PrepToReportingUserData derive(taskIds = split(replace(replace(taskIds, '{', ''), '}', ''), ',')) ~> ConvertingStringCollection",
+						"ConvertingStringCollection foldDown(unroll(taskIds),",
+						"     mapColumn(",
+						"          id,",
+						"          first_name,",
+						"          last_name,",
+						"          email,",
+						"          address,",
+						"          gender,",
+						"          dob,",
+						"          role,",
+						"          phone_number,",
+						"          password,",
+						"          taskIds",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> flatten1",
+						"flatten1 derive(taskIds = replace(replace(taskIds, '\"', ''), '\"', '')) ~> derivedColumn2",
+						"join1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> Dimensiontable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_DB_Prep_UserData')]",
+				"[concat(variables('factoryId'), '/datasets/DS_DB_Prep_Task')]",
+				"[concat(variables('factoryId'), '/datasets/reporting_DS_DB_userData_Task')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL-DS-Reporting-Demension-Table')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DF_Reporting_UserData_Task",
+								"type": "DataFlowReference",
+								"parameters": {
+									"parameter1": "taskIds"
+								},
+								"datasetParameters": {
+									"PrepToReportingUserData": {},
+									"PrepToReportingTask": {},
+									"Dimensiontable": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "PL-Reporting"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/DF_Reporting_UserData_Task')]"
 			]
 		},
 		{
@@ -824,55 +1220,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceDataset_p41')]",
 				"[concat(variables('factoryId'), '/datasets/DestinationDataset_p41')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_Staging_To_Prep_UserData')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Staging-to-Prep-UserData",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DF-Staging-UserData",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"UserdataCleaning": {},
-									"StoringInDataBase": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "PL-Staging-to-Prep"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DF-Staging-UserData')]"
 			]
 		}
 	]
