@@ -1,0 +1,19 @@
+{
+	"name": "DS_DB_Reporting_Completed_Project_details_Fart",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "DS-Reporting"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "reporting",
+			"table": "Completed_ProjectDetails"
+		}
+	}
+}

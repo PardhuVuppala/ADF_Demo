@@ -1,0 +1,19 @@
+{
+	"name": "DS_DB_Uncompleted_Projects",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "DS-Reporting"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "reporting",
+			"table": "Uncompleted_Project-Details"
+		}
+	}
+}

@@ -30,6 +30,9 @@
 				},
 				{
 					"name": "SelectTheFiledsRequired"
+				},
+				{
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -63,7 +66,7 @@
 				"          taskIds),",
 				"     Max_Dob = max(dob),",
 				"     partitionBy('hash', 1)) ~> RemovingDuplicatedata",
-				"RemovingDuplicatedata select(mapColumn(",
+				"filter1 select(mapColumn(",
 				"          id,",
 				"          first_name,",
 				"          last_name,",
@@ -78,6 +81,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> SelectTheFiledsRequired",
+				"RemovingDuplicatedata filter(taskIds!= '{}') ~> filter1",
 				"SelectTheFiledsRequired sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
