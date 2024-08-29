@@ -71,7 +71,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Data flow1",
+						"name": "DemensionTable_Project_Details",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -102,6 +102,45 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "FartTableCompletedandUnCompleted_Project_Details",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "DemensionTable_Project_Details",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"GettingTotalCompletionProject": {},
+									"Incompleteproject": {},
+									"FartTableFor100CompletionProjects": {},
+									"FarttableForNotCompletedProjects": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -113,7 +152,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DF_Reporting_UserData_Task')]"
+				"[concat(variables('factoryId'), '/dataflows/DF_Reporting_UserData_Task')]",
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
 			]
 		},
 		{
@@ -675,6 +715,30 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB_Reporting_Completed_Project_details_Fart')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Reporting"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "reporting",
+					"table": "Completed_ProjectDetails"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_DB_Staging_UserData')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -738,6 +802,30 @@
 				"typeProperties": {
 					"schema": "raw",
 					"table": "UserData"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB_Uncompleted_Projects')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Reporting"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "reporting",
+					"table": "Uncompleted_Project-Details"
 				}
 			},
 			"dependsOn": [
@@ -1030,6 +1118,9 @@
 						},
 						{
 							"name": "SelectTheFiledsRequired"
+						},
+						{
+							"name": "filter1"
 						}
 					],
 					"scriptLines": [
@@ -1063,7 +1154,7 @@
 						"          taskIds),",
 						"     Max_Dob = max(dob),",
 						"     partitionBy('hash', 1)) ~> RemovingDuplicatedata",
-						"RemovingDuplicatedata select(mapColumn(",
+						"filter1 select(mapColumn(",
 						"          id,",
 						"          first_name,",
 						"          last_name,",
@@ -1078,6 +1169,7 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> SelectTheFiledsRequired",
+						"RemovingDuplicatedata filter(taskIds!= '{}') ~> filter1",
 						"SelectTheFiledsRequired sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     deletable:false,",
@@ -1318,6 +1410,172 @@
 				"[concat(variables('factoryId'), '/datasets/DS_DB_Prep_UserData')]",
 				"[concat(variables('factoryId'), '/datasets/DS_DB_Prep_Task')]",
 				"[concat(variables('factoryId'), '/datasets/reporting_DS_DB_userData_Task')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "DF-Reporting"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "reporting_DS_DB_userData_Task",
+								"type": "DatasetReference"
+							},
+							"name": "GettingTotalCompletionProject"
+						},
+						{
+							"dataset": {
+								"referenceName": "reporting_DS_DB_userData_Task",
+								"type": "DatasetReference"
+							},
+							"name": "Incompleteproject"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_DB_Reporting_Completed_Project_details_Fart",
+								"type": "DatasetReference"
+							},
+							"name": "FartTableFor100CompletionProjects"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_DB_Uncompleted_Projects",
+								"type": "DatasetReference"
+							},
+							"name": "FarttableForNotCompletedProjects"
+						}
+					],
+					"transformations": [
+						{
+							"name": "filter1"
+						},
+						{
+							"name": "selectingrequiredColumns"
+						},
+						{
+							"name": "filter2"
+						},
+						{
+							"name": "selectingRequiedCoulmns"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          address as string,",
+						"          gender as string,",
+						"          dob as timestamp,",
+						"          role as string,",
+						"          phone_number as string,",
+						"          password as string,",
+						"          taskIds as string,",
+						"          userId as string,",
+						"          projectName as string,",
+						"          taskName as string,",
+						"          teamMembers as string,",
+						"          dueDate as timestamp,",
+						"          completionPercentage as integer,",
+						"          forStoringTasks as string,",
+						"          createdAt as timestamp,",
+						"          updatedAt as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> GettingTotalCompletionProject",
+						"source(output(",
+						"          id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          address as string,",
+						"          gender as string,",
+						"          dob as timestamp,",
+						"          role as string,",
+						"          phone_number as string,",
+						"          password as string,",
+						"          taskIds as string,",
+						"          userId as string,",
+						"          projectName as string,",
+						"          taskName as string,",
+						"          teamMembers as string,",
+						"          dueDate as timestamp,",
+						"          completionPercentage as integer,",
+						"          forStoringTasks as string,",
+						"          createdAt as timestamp,",
+						"          updatedAt as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> Incompleteproject",
+						"GettingTotalCompletionProject filter(completionPercentage==100) ~> filter1",
+						"filter1 select(mapColumn(",
+						"          id,",
+						"          first_name,",
+						"          last_name,",
+						"          taskIds,",
+						"          teamMembers,",
+						"          dueDate",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectingrequiredColumns",
+						"Incompleteproject filter(completionPercentage<100) ~> filter2",
+						"filter2 select(mapColumn(",
+						"          id,",
+						"          first_name,",
+						"          last_name,",
+						"          email,",
+						"          gender,",
+						"          taskIds,",
+						"          projectName,",
+						"          taskName,",
+						"          teamMembers,",
+						"          dueDate,",
+						"          completionPercentage,",
+						"          forStoringTasks",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectingRequiedCoulmns",
+						"selectingrequiredColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> FartTableFor100CompletionProjects",
+						"selectingRequiedCoulmns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> FarttableForNotCompletedProjects"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/reporting_DS_DB_userData_Task')]",
+				"[concat(variables('factoryId'), '/datasets/DS_DB_Reporting_Completed_Project_details_Fart')]",
+				"[concat(variables('factoryId'), '/datasets/DS_DB_Uncompleted_Projects')]"
 			]
 		}
 	]

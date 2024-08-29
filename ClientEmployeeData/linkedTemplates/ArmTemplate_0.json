@@ -225,6 +225,30 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB_Reporting_Completed_Project_details_Fart')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Reporting"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "reporting",
+					"table": "Completed_ProjectDetails"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_DB_Staging_UserData')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -288,6 +312,30 @@
 				"typeProperties": {
 					"schema": "raw",
 					"table": "UserData"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB_Uncompleted_Projects')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS-Reporting"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "reporting",
+					"table": "Uncompleted_Project-Details"
 				}
 			},
 			"dependsOn": [
@@ -492,6 +540,9 @@
 						},
 						{
 							"name": "SelectTheFiledsRequired"
+						},
+						{
+							"name": "filter1"
 						}
 					],
 					"scriptLines": [
@@ -525,7 +576,7 @@
 						"          taskIds),",
 						"     Max_Dob = max(dob),",
 						"     partitionBy('hash', 1)) ~> RemovingDuplicatedata",
-						"RemovingDuplicatedata select(mapColumn(",
+						"filter1 select(mapColumn(",
 						"          id,",
 						"          first_name,",
 						"          last_name,",
@@ -540,6 +591,7 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> SelectTheFiledsRequired",
+						"RemovingDuplicatedata filter(taskIds!= '{}') ~> filter1",
 						"SelectTheFiledsRequired sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     deletable:false,",
@@ -780,446 +832,6 @@
 				"[concat(variables('factoryId'), '/datasets/DS_DB_Prep_UserData')]",
 				"[concat(variables('factoryId'), '/datasets/DS_DB_Prep_Task')]",
 				"[concat(variables('factoryId'), '/datasets/reporting_DS_DB_userData_Task')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL-DS-Reporting-Demension-Table')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DF_Reporting_UserData_Task",
-								"type": "DataFlowReference",
-								"parameters": {
-									"parameter1": "taskIds"
-								},
-								"datasetParameters": {
-									"PrepToReportingUserData": {},
-									"PrepToReportingTask": {},
-									"Dimensiontable": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "PL-Reporting"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DF_Reporting_UserData_Task')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL-Data-Injection')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ForEach_p41",
-						"type": "ForEach",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@pipeline().parameters.cw_items",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Copy_p41",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [
-										{
-											"name": "Source",
-											"value": "public.@{item().source.table}"
-										},
-										{
-											"name": "Destination",
-											"value": "raw.@{item().destination.table}"
-										}
-									],
-									"typeProperties": {
-										"source": {
-											"type": "PostgreSqlV2Source"
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"tableOption": "autoCreate"
-										},
-										"enableStaging": false,
-										"validateDataConsistency": false,
-										"translator": {
-											"value": "@item().copyActivity.translator",
-											"type": "Expression"
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "SourceDataset_p41",
-											"type": "DatasetReference",
-											"parameters": {
-												"cw_table": "@item().source.table"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DestinationDataset_p41",
-											"type": "DatasetReference",
-											"parameters": {
-												"cw_table": "@item().destination.table"
-											}
-										}
-									]
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"cw_items": {
-						"type": "Array",
-						"defaultValue": [
-							{
-								"source": {
-									"table": "Task"
-								},
-								"destination": {
-									"table": "Task"
-								},
-								"copyActivity": {
-									"translator": {
-										"type": "TabularTranslator",
-										"mappings": [
-											{
-												"source": {
-													"name": "id",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "id",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "userId",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "userId",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "projectName",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "projectName",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "taskName",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "taskName",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "teamMembers",
-													"type": "String",
-													"physicalType": "jsonb"
-												},
-												"sink": {
-													"name": "teamMembers",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "dueDate",
-													"type": "DateTime",
-													"physicalType": "timestamp without time zone"
-												},
-												"sink": {
-													"name": "dueDate",
-													"type": "DateTime",
-													"physicalType": "datetime2"
-												}
-											},
-											{
-												"source": {
-													"name": "completionPercentage",
-													"type": "Int32",
-													"physicalType": "integer"
-												},
-												"sink": {
-													"name": "completionPercentage",
-													"type": "Int32",
-													"physicalType": "int"
-												}
-											},
-											{
-												"source": {
-													"name": "forStoringTasks",
-													"type": "String",
-													"physicalType": "jsonb"
-												},
-												"sink": {
-													"name": "forStoringTasks",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "createdAt",
-													"type": "DateTime",
-													"physicalType": "timestamp without time zone"
-												},
-												"sink": {
-													"name": "createdAt",
-													"type": "DateTime",
-													"physicalType": "datetime2"
-												}
-											},
-											{
-												"source": {
-													"name": "updatedAt",
-													"type": "DateTime",
-													"physicalType": "timestamp without time zone"
-												},
-												"sink": {
-													"name": "updatedAt",
-													"type": "DateTime",
-													"physicalType": "datetime2"
-												}
-											}
-										],
-										"typeConversion": true,
-										"typeConversionSettings": {
-											"allowDataTruncation": true,
-											"treatBooleanAsNumber": false
-										}
-									}
-								}
-							},
-							{
-								"source": {
-									"table": "UserData"
-								},
-								"destination": {
-									"table": "UserData"
-								},
-								"copyActivity": {
-									"translator": {
-										"type": "TabularTranslator",
-										"mappings": [
-											{
-												"source": {
-													"name": "id",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "id",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "first_name",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "first_name",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "last_name",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "last_name",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "email",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "email",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "address",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "address",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "gender",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "gender",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "dob",
-													"type": "DateTime",
-													"physicalType": "timestamp without time zone"
-												},
-												"sink": {
-													"name": "dob",
-													"type": "DateTime",
-													"physicalType": "datetime2"
-												}
-											},
-											{
-												"source": {
-													"name": "role",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "role",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "phone_number",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "phone_number",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "password",
-													"type": "String",
-													"physicalType": "text"
-												},
-												"sink": {
-													"name": "password",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											},
-											{
-												"source": {
-													"name": "taskIds",
-													"type": "String",
-													"physicalType": "ARRAY"
-												},
-												"sink": {
-													"name": "taskIds",
-													"type": "String",
-													"physicalType": "nvarchar"
-												}
-											}
-										],
-										"typeConversion": true,
-										"typeConversionSettings": {
-											"allowDataTruncation": true,
-											"treatBooleanAsNumber": false
-										}
-									}
-								}
-							}
-						]
-					}
-				},
-				"folder": {
-					"name": "PL-Injection"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SourceDataset_p41')]",
-				"[concat(variables('factoryId'), '/datasets/DestinationDataset_p41')]"
 			]
 		}
 	]
