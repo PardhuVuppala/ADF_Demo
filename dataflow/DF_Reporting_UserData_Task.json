@@ -1,0 +1,122 @@
+{
+	"name": "DF_Reporting_UserData_Task",
+	"properties": {
+		"folder": {
+			"name": "DF-PREP"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_DB_Prep_UserData",
+						"type": "DatasetReference"
+					},
+					"name": "PrepToReportingUserData"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_DB_Prep_Task",
+						"type": "DatasetReference"
+					},
+					"name": "PrepToReportingTask"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "reporting_DS_DB_userData_Task",
+						"type": "DatasetReference"
+					},
+					"name": "Dimensiontable"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "ConvertingStringCollection"
+				},
+				{
+					"name": "flatten1"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     parameter1 as string (taskIds)",
+				"}",
+				"source(output(",
+				"          id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          address as string,",
+				"          gender as string,",
+				"          dob as timestamp,",
+				"          role as string,",
+				"          phone_number as string,",
+				"          password as string,",
+				"          taskIds as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> PrepToReportingUserData",
+				"source(output(",
+				"          id as string,",
+				"          userId as string,",
+				"          projectName as string,",
+				"          taskName as string,",
+				"          teamMembers as string,",
+				"          dueDate as timestamp,",
+				"          completionPercentage as integer,",
+				"          forStoringTasks as string,",
+				"          createdAt as timestamp,",
+				"          updatedAt as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> PrepToReportingTask",
+				"derivedColumn2, PrepToReportingTask join(taskIds == PrepToReportingTask@id,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"PrepToReportingUserData derive(taskIds = split(replace(replace(taskIds, '{', ''), '}', ''), ',')\r",
+				") ~> ConvertingStringCollection",
+				"ConvertingStringCollection foldDown(unroll(taskIds),",
+				"     mapColumn(",
+				"          id,",
+				"          first_name,",
+				"          last_name,",
+				"          email,",
+				"          address,",
+				"          gender,",
+				"          dob,",
+				"          role,",
+				"          phone_number,",
+				"          password,",
+				"          taskIds",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 derive(taskIds = replace(replace(taskIds, '\"', ''), '\"', '')) ~> derivedColumn2",
+				"join1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> Dimensiontable"
+			]
+		}
+	}
+}

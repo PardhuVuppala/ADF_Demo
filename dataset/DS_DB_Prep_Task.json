@@ -1,18 +1,18 @@
 {
-	"name": "DS_Staging_Task",
+	"name": "DS_DB_Prep_Task",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabase1",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "DS-Staging"
+			"name": "DS-Prep"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "raw",
+			"schema": "prep",
 			"table": "Task"
 		}
 	}

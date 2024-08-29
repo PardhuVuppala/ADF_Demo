@@ -1,19 +1,19 @@
 {
-	"name": "DS_Staging_Task",
+	"name": "reporting_DS_DB_userData_Task",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabase1",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "DS-Staging"
+			"name": "DS-Reporting"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "raw",
-			"table": "Task"
+			"schema": "reporting",
+			"table": "Dimension_Table_userData_task"
 		}
 	}
 }

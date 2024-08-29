@@ -1,19 +1,19 @@
 {
-	"name": "DS_Staging_Task",
+	"name": "DS_DB_Prep_UserData",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabase1",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "DS-Staging"
+			"name": "DS-Prep"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "raw",
-			"table": "Task"
+			"schema": "prep",
+			"table": "UserData"
 		}
 	}
 }
