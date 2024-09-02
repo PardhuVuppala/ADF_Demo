@@ -439,7 +439,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": "reporting",
-					"table": "Dimension_Table_userData_task"
+					"table": "Fart_Table_userData_task"
 				}
 			},
 			"dependsOn": [
