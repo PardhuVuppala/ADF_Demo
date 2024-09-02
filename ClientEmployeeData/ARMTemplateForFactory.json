@@ -65,6 +65,116 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/Excution_Pipelines')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Staging",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "InjectingData",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Staging_To_Prep_UserData",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "PREP",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Staging",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Pl_Staging_To_Prep_Task",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Reporting",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PREP",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL-DS-Reporting-Demension-Table",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "InjectingData",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL-DS-Reporting-Demension-Table",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Excute_PipeLines"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Staging_To_Prep_UserData')]",
+				"[concat(variables('factoryId'), '/pipelines/Pl_Staging_To_Prep_Task')]",
+				"[concat(variables('factoryId'), '/pipelines/PL-DS-Reporting-Demension-Table')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL-DS-Reporting-Demension-Table')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -640,116 +750,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/DFStagingTask')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Staging",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "InjectingData",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL_Staging_To_Prep_UserData",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "PREP",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Staging",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Pl_Staging_To_Prep_Task",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Reporting",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "PREP",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL-DS-Reporting-Demension-Table",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "InjectingData",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "PL-DS-Reporting-Demension-Table",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "Excute_PipeLines"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_Staging_To_Prep_UserData')]",
-				"[concat(variables('factoryId'), '/pipelines/Pl_Staging_To_Prep_Task')]",
-				"[concat(variables('factoryId'), '/pipelines/PL-DS-Reporting-Demension-Table')]"
 			]
 		},
 		{
