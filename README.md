@@ -1,8 +1,8 @@
-### 📚 Overview
+## 📚 Overview
 This document provides detailed information about the HubSpot data source ingestion connector, including the required credentials, supported data points for ingestion, supported tools and destinations, and any known limitations or considerations
 
 ## 🔑 Prerequisites
-## 🛠️ Step 1: Create a HubSpot Private App
+### 🛠️ Step 1: Create a HubSpot Private App
 
 1. Go to your HubSpot dashboard.
 2. Navigate to:  
@@ -26,7 +26,7 @@ This document provides detailed information about the HubSpot data source ingest
 
 ---
 
-## 📋 Step 2: Copy Your Access Token
+### 📋 Step 2: Copy Your Access Token
 
 - After creation, HubSpot will generate an **Access Token**
 - **Copy this token** immediately – it is shown only once
@@ -36,10 +36,10 @@ This document provides detailed information about the HubSpot data source ingest
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
-### Data Source URL:
+## Data Source URL:
 For the endpoint or URL refer the **hubspot_job_master** 
 
-### 🧰 Supported Tools
+## 🧰 Supported Tools
 - ✅ ADF (Azure Data Factory)
 - ✅ Python (PySpark)
 
