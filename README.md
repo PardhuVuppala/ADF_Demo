@@ -51,16 +51,16 @@ This ensures the enrichment workflow runs smoothly without errors.
 └── README.md                 # Project documentation
 
 
-
-## Default variables
-
-| **Variable Name**                    | **Datatype** | **Default Value** | **Purpose**                                                      |
-| ------------------------------------ | ------------ | ----------------- | ---------------------------------------------------------------- |
-| `threshold_merge`                    | number       | 6                 | Accepted threshold for merge                                     |
-| `threshold_possible_merge`           | number       | 5                 | Accepted threshold for possible merge                            |
-| `threshold_total_match_score`        | number       | 0.7               | Accepted threshold for total match score                         |
-| `avoid_dummy_values_count_threshold` | number       | 20000             | Threshold to avoid dummy record counts during matching           |
-| `exclude_column_values`              | boolean      | True              | Whether to exclude columns listed in `exclude_column_values.csv` |
+| **Variable Name**       | **Datatype** | **Default Value** | **Purpose**                                             |
+| ----------------------- | ------------ | ----------------- | ------------------------------------------------------- |
+| `MAX_THREADS`           | number       | 5                 | Number of parallel threads for Companies House API      |
+| `REQUEST_DELAY`         | number       | 0.3               | Delay between requests to avoid rate limiting           |
+| `NAME_MATCH_THRESHOLD`  | number       | 0.75              | 75% similarity threshold for high confidence name match |
+| `EXACT_MATCH_THRESHOLD` | number       | 0.95              | 95% similarity threshold for exact confidence           |
+| `MAX_RETRIES`           | number       | 3                 | Maximum number of retries for failed requests           |
+| `RETRY_DELAY`           | number       | 5                 | Seconds to wait between retries                         |
+| `API_TIMEOUT`           | number       | 30                | Timeout duration for API requests (seconds)             |
+| `FORBIDDEN_SLEEP`       | number       | 60                | Delay on receiving 403 Forbidden response (seconds)     |
 
 
 ## 🔄 How it Works
