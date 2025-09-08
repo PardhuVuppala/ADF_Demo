@@ -51,6 +51,7 @@ This ensures the enrichment workflow runs smoothly without errors.
 └── README.md                 # Project documentation
 
 
+
 ## Default variables
 
 | **Variable Name**                    | **Datatype** | **Default Value** | **Purpose**                                                      |
