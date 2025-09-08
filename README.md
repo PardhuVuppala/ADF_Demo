@@ -1,5 +1,4 @@
 
-
 # Customer Enrichment Using Company House and LLM
 
 ## 📌 Overview
@@ -28,26 +27,28 @@ Make sure that even if optional field values are missing, the give Input table m
 This ensures the enrichment workflow runs smoothly without errors.
 
 ## 📁 Project Structure
+
 .
-├── configs/config             # Save configuration files
-├── utils/                     # Contain all the functions (including LLM + CH)
-│   └── api_rotation
-│   └── ch_utils
-│   └── client_verification
-│   └── compare_llm_ch_results
-│   └── enrich_non_entity
-│   └── enriching_clients
-│   └── enrich_with_crn
-│   └── enrichment_info_helper
-│   └── filter_client_for_enrichment
-│   └── helper_functions
-│   └── llm_utils
-│   └── load_input_data
-│   └── sparkSession
-│   └── store_data
-│   └── storing_final_enriched_clients
-│── main.ipynb 
-└── README.md
+├── configs/                   # Configuration files
+│   └── config
+├── utils/                     # Utility functions (including LLM + CH)
+│   ├── api_rotation/
+│   ├── ch_utils/
+│   ├── client_verification/
+│   ├── compare_llm_ch_results/
+│   ├── enrich_non_entity/
+│   ├── enriching_clients/
+│   ├── enrich_with_crn/
+│   ├── enrichment_info_helper/
+│   ├── filter_client_for_enrichment/
+│   ├── helper_functions/
+│   ├── llm_utils/
+│   ├── load_input_data/
+│   ├── sparkSession/
+│   ├── store_data/
+│   └── storing_final_enriched_clients/
+├── main.ipynb                # Main notebook
+└── README.md                 # Project documentation
 
 
 ## Default variables
@@ -157,4 +158,4 @@ This ensures the enrichment workflow runs smoothly without errors.
 
 ## 📊 Improvements
 
-- Create Seperate CSV files of ch_enriched_mapping file .
+- Create Seperate CSV files of ch_enriched_mapping file . 
