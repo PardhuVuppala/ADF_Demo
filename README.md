@@ -26,8 +26,9 @@ It is useful because:
 Make sure that even if optional field values are missing, the give Input table must still include these column names.  
 This ensures the enrichment workflow runs smoothly without errors.
 
-## 📁 Project Structure
+# Project Structure
 
+```plaintext
 .
 ├── configs/                   # Configuration files
 │   └── config
