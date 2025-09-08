@@ -26,7 +26,7 @@ It is useful because:
 Make sure that even if optional field values are missing, the give Input table must still include these column names.  
 This ensures the enrichment workflow runs smoothly without errors.
 
-# Project Structure
+## 📁 Project Structure
 
 ```plaintext
 .
@@ -50,7 +50,9 @@ This ensures the enrichment workflow runs smoothly without errors.
 │   └── storing_final_enriched_clients/
 ├── main.ipynb                # Main notebook
 └── README.md                 # Project documentation
+```
 
+## Default variables
 
 | **Variable Name**       | **Datatype** | **Default Value** | **Purpose**                                             |
 | ----------------------- | ------------ | ----------------- | ------------------------------------------------------- |
@@ -160,4 +162,4 @@ This ensures the enrichment workflow runs smoothly without errors.
 
 ## 📊 Improvements
 
-- Create Seperate CSV files of ch_enriched_mapping file . 
+- Create Seperate CSV files of ch_enriched_mapping file .
